@@ -1,0 +1,299 @@
+﻿@model GuardID.Models.UploadResultViewModel
+
+@{
+    ViewData["Title"] = "Result Page";
+}
+
+<link rel="stylesheet" href="~/css/Result.css" asp-append-version="true" />
+
+@if (ViewBag.Error != null)
+{
+    <div class="alert alert-danger">
+        <strong>Error:</strong> @ViewBag.Error
+    </div>
+}
+else
+{
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-md-4 text-center">
+                <h3>Front ID Image</h3>
+                <div class="image-container">
+                    <img src="data:image/jpeg;base64,@Model.FrontIdImage" alt="Uploaded FrontId" />
+                    <div class="label">Uploaded FrontId</div>
+                </div>
+                <div class="image-container">
+                    <img src="data:image/jpeg;base64,@Model.FrontIdFaceImage" alt="FrontId Face Detected" />
+                    <div class="label">FrontId Face Detected</div>
+                </div>             
+            </div>
+            <div class="col-md-4 text-center">
+                <h3>Back ID Image</h3>
+                <div class="image-container">
+                    <img src="data:image/jpeg;base64,@Model.BackIdImage" alt="Uploaded BackId" />
+                    <div class="label">Uploaded BackId</div>
+                </div>
+            </div>
+            <div class="col-md-4 text-center">
+                <h3>Selfie Image</h3>
+                <div class="image-container">
+                    <img src="data:image/jpeg;base64,@Model.SelfieImage" alt="Uploaded Selfie" />
+                    <div class="label">Uploaded Selfie</div>
+                </div>
+                <div class="image-container">
+                    <img src="data:image/jpeg;base64,@Model.SelfieFaceImage" alt="Selfie Face Detected" />
+                    <div class="label">Selfie Face Detected</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <h3 class="mt-3">Front ID Extracted Text</h3>
+                @if (Model.ExtractedLinesFrontID.Any() && Model.ExtractedLinesFrontID != null)
+                {
+                    foreach (var line in Model.ExtractedLinesFrontID)
+                    {
+                        <p>@line</p>
+                    }
+                }
+            </div>
+            <div class="col-md-4">
+                <h3 class="mt-3">Back ID Barcode Information</h3>
+                @if (Model.BarcodeTextstr != null)
+                {
+                    <p>@Model.BarcodeTextstr</p>
+                }
+                @if (Model.BarcodeText != null)
+                {
+                    <table class="barcode-data-table">
+                        <tr>
+                            <th>Field</th>
+                            <th>Value</th>
+                        </tr>
+                        <tr>
+                            <td>Customer ID</td>
+                            <td>@Model.BarcodeText.CustomerID</td>
+                        </tr>
+                        <tr>
+                            <td>Last Name</td>
+                            <td>@Model.BarcodeText.LastName</td>
+                        </tr>
+                        <tr>
+                            <td>First Name</td>
+                            <td>@Model.BarcodeText.FirstName</td>
+                        </tr>
+                        <tr>
+                            <td>Middle Name</td>
+                            <td>@Model.BarcodeText.MiddleName</td>
+                        </tr>
+                        <tr>
+                            <td>Date of Birth</td>
+                            <td>@Model.BarcodeText.DateOfBirth.ToShortDateString()</td>
+                        </tr>
+                        <tr>
+                            <td>Sex</td>
+                            <td>@Model.BarcodeText.Sex</td>
+                        </tr>
+                        <tr>
+                            <td>Height</td>
+                            <td>@Model.BarcodeText.Height</td>
+                        </tr>
+                        <tr>
+                            <td>Street</td>
+                            <td>@Model.BarcodeText.Street</td>
+                        </tr>
+                        <tr>
+                            <td>City</td>
+                            <td>@Model.BarcodeText.City</td>
+                        </tr>
+                        <tr>
+                            <td>State</td>
+                            <td>@Model.BarcodeText.State</td>
+                        </tr>
+                        <tr>
+                            <td>Country</td>
+                            <td>@Model.BarcodeText.Country</td>
+                        </tr>
+                        <tr>
+                            <td>Postal Code</td>
+                            <td>@Model.BarcodeText.PostalCode</td>
+                        </tr>
+                        <tr>
+                            <td>Document Issue Date</td>
+                            <td>@Model.BarcodeText.IssueDate.ToShortDateString()</td>
+                        </tr>
+                        <tr>
+                            <td>Document Expiration Date</td>
+                            <td>@Model.BarcodeText.ExpiryDate.ToShortDateString()</td>
+                        </tr>
+                        <tr>
+                            <td>Document Discriminator</td>
+                            <td>@Model.BarcodeText.DocumentDiscriminator</td>
+                        </tr>
+                        <tr>
+                            <td>Issuer Identification Number</td>
+                            <td>@Model.BarcodeText.IssuerIdentificationNumber</td>
+                        </tr>
+                    </table>
+                }
+            </div>
+            <div class="col-md-4">
+                <h3>Selfie Image Information</h3>
+                <div class="row">
+                    <div class="col-md-4">
+                        <p><strong>Camera Make:</strong> @(Model.Metadata.CameraMake ?? "Not Available")</p>
+                    </div>
+                    <div class="col-md-4">
+                        <p><strong>Camera Model:</strong> @(Model.Metadata.CameraModel ?? "Not Available")</p>
+                    </div>
+                    <div class="col-md-4">
+                        <p><strong>Date Taken:</strong> @(Model.Metadata.DateTimeOriginal ?? "Not Available")</p>
+                    </div>
+                    <div class="col-md-4">
+                        <p><strong>GPS Latitude:</strong> @Model.Metadata.GPSLatitude</p>
+                    </div>
+                    <div class="col-md-4">
+                        <p><strong>GPS Longitude:</strong> @Model.Metadata.GPSLongitude</p>
+                    </div>
+                    <div class="col-md-4">
+                        <p><strong>Flash:</strong> @(Model.Metadata.Flash ?? "Not Available")</p>
+                    </div>
+                    <div class="col-md-4">
+                        <p><strong>County:</strong> @Model.Location.Address.County</p>
+                    </div>
+                    <div class="col-md-4">
+                        <p><strong>State:</strong> @Model.Location.Address.State</p>
+                    </div>
+                    <div class="col-md-4">
+                        <p><strong>Address:</strong> @Model.Location.DisplayName</p>
+                    </div>
+                    <div class="col-md-4">
+                        <p><strong>Postcode:</strong> @Model.Location.Address.Postcode</p>
+                    </div>
+                    <div class="col-md-4">
+                        <p><strong>Country:</strong> @Model.Location.Address.Country</p>
+                    </div>
+                    <div class="col-md-4">
+                        <p><strong>Country Code:</strong> @Model.Location.Address.CountryCode</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <h3>IP Information</h3>
+                @if (Model.IpLocation != null)
+                {
+                    <table class="barcode-data-table">
+                        <tr>
+                            <th>Field</th>
+                            <th>Value</th>
+                        </tr>
+                        <tr>
+                            <td>Ip</td>
+                            <td>@Model.IpLocation.Query</td>
+                        </tr>
+                        <tr>
+                            <td>Status</td>
+                            <td>@Model.IpLocation.Status</td>
+                        </tr>
+                        <tr>
+                            <td>Country</td>
+                            <td>@Model.IpLocation.Country</td>
+                        </tr>
+                        <tr>
+                            <td>Country Code</td>
+                            <td>@Model.IpLocation.CountryCode</td>
+                        </tr>
+                        <tr>
+                            <td>Region</td>
+                            <td>@Model.IpLocation.Region</td>
+                        </tr>
+                        <tr>
+                            <td>Region Name</td>
+                            <td>@Model.IpLocation.RegionName</td>
+                        </tr>
+                        <tr>
+                            <td>City</td>
+                            <td>@Model.IpLocation.City</td>
+                        </tr>
+                        <tr>
+                            <td>Zip</td>
+                            <td>@Model.IpLocation.Zip</td>
+                        </tr>
+                        <tr>
+                            <td>Latitude</td>
+                            <td>@Model.IpLocation.Lat</td>
+                        </tr>
+                        <tr>
+                            <td>Longitude</td>
+                            <td>@Model.IpLocation.Lon</td>
+                        </tr>
+                        <tr>
+                            <td>Timezone</td>
+                            <td>@Model.IpLocation.Timezone</td>
+                        </tr>
+                        <tr>
+                            <td>ISP</td>
+                            <td>@Model.IpLocation.Isp</td>
+                        </tr>
+                        <tr>
+                            <td>Organization</td>
+                            <td>@Model.IpLocation.Org</td>
+                        </tr>
+                        <tr>
+                            <td>AS</td>
+                            <td>@Model.IpLocation.As</td>
+                        </tr>
+                    </table>
+                }
+                else
+                {
+                    <p>Failed to retrieve IP information.</p>
+                }
+            </div>
+            <div class="col-md-4">
+                <h3>Face Matching Score front Id vs selfie</h3>
+                <span>Threshold: @Model.Threshold</span>
+                <p>any score of @Model.Threshold or lower is considered a match</p>
+                <p><strong>Score: @Model.FaceScore</strong></p>
+                <p><strong>@Model.FaceMatch</strong></p>
+                <p><strong>Percentage Score: @Model.FaceScorePercentage%</strong></p>
+                <h3>Text Matching Score front Id vs barcode</h3>
+                <strong>List of match information barcode vs front Id</strong>
+                <ul>
+                    @foreach (var item in ViewBag.matches)
+                    {
+                        <li>@item</li>
+                    }
+                </ul>
+                <strong>List of unmatch information barcode vs front Id</strong>
+                <ul>
+                    @if (ViewBag.Nomatches != null)
+                    {
+                        foreach (var item in ViewBag.Nomatches)
+                        {
+                            <li>@item</li>
+                        }
+                    }
+                </ul>
+                @if (ViewBag.totalWordsChecked != null)
+                {
+                    <p><strong>@ViewBag.score out of @ViewBag.totalWordsChecked match(s) found</strong></p>
+                    <p><strong>Score: @Model.TextSimilarity%</strong></p>
+                }                
+                <h3>Distance between IP and Selfie</h3>
+                <p>any Distance of 100 miles or lower is considered in range</p>
+                <p><strong>Distance: @(double.IsNaN(Model.Distance) ? "Not Available" : $"{Model.Distance} miles")</strong></p>
+                <p><strong>Score: @Model.DistancePercentageScore%</strong></p>
+            </div>
+            <div class="col-md-4">
+                <h3>Overall Score</h3>
+                <p>any score of 80% or highr is considered a successful submission</p>
+                <p><strong>Score: @Model.OverallScore%</strong></p>
+            </div>
+        </div>
+    </div>
+    <div style="height:60px;"></div>
+}

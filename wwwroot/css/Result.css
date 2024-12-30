@@ -1,0 +1,33 @@
+﻿img {
+    height: 100px;
+    max-width: 160px
+}
+
+.barcode-data-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+    .barcode-data-table th, .barcode-data-table td {
+        border: 1px solid #ddd;
+        padding: 8px;
+    }
+
+    .barcode-data-table th {
+        padding-top: 12px;
+        padding-bottom: 12px;
+        text-align: left;
+    }
+
+.image-container {
+    display: inline-block;
+}
+
+.label {
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 5px;
+    border-radius: 3px;
+    font-size: 14px;
+    font-weight: bold;
+}

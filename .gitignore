@@ -1,0 +1,28 @@
+﻿# Visual Studio
+.vs/
+*.user
+*.suo
+
+# ASP.NET Core
+bin/
+obj/
+wwwroot/generated-assets/
+
+# Secrets
+Resources/GoogleCloudVision.json
+appsettings.Development.json
+appsettings.Local.json
+appsettings.json
+*.key
+*.json
+
+# Logs
+*.log
+logs/
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Dependency directories
+packages/

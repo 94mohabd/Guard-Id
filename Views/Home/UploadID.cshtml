@@ -1,0 +1,266 @@
+﻿@{
+    ViewData["Title"] = "Upload Id";
+}
+
+<link rel="stylesheet" href="~/css/UploadID.css" asp-append-version="true" />
+
+@using (Html.BeginForm("UploadID", "Home", FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    <div class="wrapper">
+        <h1>Upload ID Documents</h1>
+        <div class="container">
+            <div class="upload-section" id="upload-section-1">
+                <label for="frontId">
+                    Upload Front of ID
+                    <div class="upload-container">
+                        <div class="border-container">
+                            <div class="icons fa-2x">
+                                <i class="fas fa-id-card" data-fa-transform="shrink-3 down-2 left-6 rotate--45"></i>
+                            </div>
+                            <div id="frontIdloadingMessage" style="display:none;">
+                                Checking Image, please wait...
+                                <div class="spinner"></div>
+                            </div>
+                            <div id="frontIdError" class="alert alert-danger" style="display: none;">
+                                <strong>Error: </strong><span id="frontIdErrorMessage"></span>
+                            </div>
+                            <input type="file" name="frontId" id="frontId" accept="image/x-png,image/gif,image/jpeg" class="form-control" onchange="handleFrontIdChange(this);" capture="camera" required />
+                            <div class="img-cont">
+                                <img id="preview-1" src="#" height="100" alt="your image" style="display: none;" />
+                            </div>
+                        </div>
+                    </div>
+                </label>
+            </div>
+
+            <div class="upload-section" id="upload-section-2" style="display: none;">
+                <label for="backId">
+                    Upload Back of ID
+                    <div class="upload-container">
+                        <div class="border-container">
+                            <div class="icons fa-2x">
+                                <i class="fas fa-id-card" data-fa-transform="shrink-3 down-2 left-6 rotate--45"></i>
+                            </div>
+                            <div id="backIdloadingMessage" style="display:none;">
+                                Checking Image, please wait...
+                                <div class="spinner"></div>
+                            </div>
+                            <div id="backIdError" class="alert alert-danger" style="display: none;">
+                                <strong>Error: </strong><span id="backIdErrorMessage"></span>
+                            </div>
+                            <input type="file" name="backId" id="backId" accept="image/x-png,image/gif,image/jpeg" class="form-control" onchange="handleBackIdChange(this);" capture="camera" required />
+                            <div class="img-cont">
+                                <img id="preview-2" src="#" height="100" alt="your image" style="display: none;" />
+                            </div>
+                        </div>
+                    </div>
+                </label>
+            </div>
+
+            <div class="upload-section" id="upload-section-3" style="display: none;">
+                <label for="selfie">
+                    Upload Selfie
+                    <div class="upload-container">
+                        <div class="border-container">
+                            <div class="icons fa-2x">
+                                <i class="fas fa-camera" data-fa-transform="shrink-3 down-2 left-6 rotate--45"></i>
+                            </div>
+                            <div id="selfieloadingMessage" style="display:none;">
+                                Checking Image, please wait...
+                                <div class="spinner"></div>
+                            </div>
+                            <div id="selfieError" class="alert alert-danger" style="display: none;">
+                                <strong>Error: </strong><span id="selfieErrorMessage"></span>
+                            </div>
+                            <input type="file" name="selfie" id="selfie" accept="image/*" class="form-control" onchange="handleSelfieChange(this);" capture="camera" required />
+                            <div class="img-cont">
+                                <img id="preview-3" src="#" height="100" alt="your image" style="display: none;" />
+                            </div>                            
+                        </div>
+                    </div>
+                </label>
+            </div>
+        </div>
+        <div class="form-group">
+            <input type="submit" value="Submit" class="btn btn-primary" id="submit-btn" style="display: none;" />
+        </div>
+        <div style="height:40px;"></div>
+    </div>
+}
+
+<script>
+    async function DetectFaceinImage(imageFile) {
+        const formData = new FormData();
+        formData.append('imageFile', imageFile);
+        const response = await fetch('/Home/DetectFaceinImage', {
+            method: 'POST',
+            body: formData,
+        });
+        return await response.json();
+    }
+
+    async function DetectBarCodeinImage(imageFile) {
+        const formData = new FormData();
+        formData.append('imageFile', imageFile);
+        const response = await fetch('/Home/DetectBarCodeinImage', {
+            method: 'POST',
+            body: formData,
+        });
+        return await response.json();
+    }
+
+    async function DetectTextinImage(imageFile) {
+        const formData = new FormData();
+        formData.append('imageFile', imageFile);
+        const response = await fetch('/Home/DetectTextinImage', {
+            method: 'POST',
+            body: formData,
+        });
+        return await response.json();
+    }
+
+        async function handleFrontIdChange(input) {
+            $('#frontIdError').hide();
+            $('#frontIdloadingMessage').show();
+            if (input.files && input.files[0]) {
+            const imageFile = input.files[0];
+            let resizedImage = await resizeImageTo1MB(imageFile);
+            var hasFace = await DetectFaceinImage(resizedImage);
+            var hasText = await DetectTextinImage(resizedImage);
+            $('#frontIdloadingMessage').hide();
+            if (!hasFace.success) {
+                $('#frontIdErrorMessage').text(hasFace.message);
+                $('#frontIdError').show();
+            }
+            if (!hasText.success) {
+                $('#frontIdErrorMessage').text(hasText.message);
+                $('#frontIdError').show();
+            }
+            else if(hasFace.success && hasText.success) {
+                $('#error').hide();
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    var previewElement = $(input).closest('.border-container').find('#preview-1');
+                    previewElement.attr('src', e.target.result);
+                    previewElement.show();
+                    $('#upload-section-2').slideDown();
+                };
+                reader.readAsDataURL(resizedImage);
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(new File([resizedImage], imageFile.name, { type: imageFile.type }));
+                input.files = dataTransfer.files;
+            }
+        }
+    }
+
+    async function handleBackIdChange(input) {
+        $('#backIdError').hide();
+        $('#backIdloadingMessage').show();
+        if (input.files && input.files[0]) {
+            const imageFile = input.files[0];
+            let resizedImage = await resizeImageTo1MB(imageFile);
+            var hasBarCode = await DetectBarCodeinImage(resizedImage);
+                $('#backIdloadingMessage').hide();
+            if (!hasBarCode.success) {
+                $('#backIdErrorMessage').text(hasBarCode.message);
+                $('#backIdError').show();
+            }
+            else {
+                $('#backIdError').hide();
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    var previewElement = $(input).closest('.border-container').find('#preview-2');
+                    previewElement.attr('src', e.target.result);
+                    previewElement.show();
+                    $('#upload-section-3').slideDown();
+                };
+                reader.readAsDataURL(resizedImage);
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(new File([resizedImage], imageFile.name, { type: imageFile.type }));
+                input.files = dataTransfer.files;
+            }
+        }
+    }
+
+    async function handleSelfieChange(input) {
+        $('#selfieError').hide();
+        $('#selfieloadingMessage').show();
+        if (input.files && input.files[0]) {
+            const imageFile = input.files[0];
+            let resizedImage = await resizeImageTo1MB(imageFile);
+            var hasFace = await DetectFaceinImage(resizedImage);
+            $('#selfieloadingMessage').hide();
+            if (!hasFace.success) {
+                $('#selfieErrorMessage').text(hasFace.message);
+                $('#selfieError').show();
+                $('#submit-btn').hide();
+            }
+            else {
+                $('#selfieError').hide();
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    var previewElement = $(input).closest('.border-container').find('#preview-3');
+                    previewElement.attr('src', e.target.result);
+                    previewElement.show();
+                    $('#submit-btn').show();
+                };
+                reader.readAsDataURL(resizedImage);
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(new File([resizedImage], imageFile.name, { type: imageFile.type }));
+                input.files = dataTransfer.files;
+            }
+        }
+    }
+
+
+    async function resizeImageTo1MB(file) {
+        const maxFileSize = 1024 * 1024; // 1MB
+            if (file.size <= maxFileSize) {
+            return file;
+        }
+        const reader = new FileReader();
+
+        return new Promise((resolve, reject) => {
+            reader.onload = event => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    let width = img.width;
+                    let height = img.height;
+
+                    // Calculate the new dimensions
+                    if (width > height) {
+                        if (width > 1024) {
+                            height = Math.round((height *= 1024 / width));
+                            width = 1024;
+                        }
+                    } else {
+                        if (height > 1024) {
+                            width = Math.round((width *= 1024 / height));
+                            height = 1024;
+                        }
+                    }
+                    canvas.width = width;
+                    canvas.height = height;
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    canvas.toBlob(
+                        blob => {
+                            if (blob.size > maxFileSize) {
+                                resolve(resizeImageTo1MB(blob));
+                            } else {
+                                resolve(blob);
+                            }
+                        },
+                        'image/jpeg',
+                        0.7
+                    );
+                };
+                img.src = event.target.result;
+            };
+            reader.onerror = error => reject(error);
+            reader.readAsDataURL(file);
+        });
+    }
+</script>
