@@ -15,6 +15,7 @@ appsettings.Local.json
 appsettings.json
 *.key
 *.json
+*.pubxml
 
 # Logs
 *.log
