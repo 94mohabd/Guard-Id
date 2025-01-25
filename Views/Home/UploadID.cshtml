@@ -85,10 +85,26 @@
             <input type="submit" value="Submit" class="btn btn-primary" id="submit-btn" style="display: none;" />
         </div>
         <div style="height:40px;"></div>
+
+        <!-- Loading Screen -->
+        <div id="loadingScreen">
+            <div class="spinner"></div>
+            <p>Uploading, please wait...</p>
+        </div>
     </div>
 }
 
 <script>
+    $(document).ready(function () {      
+        $('form').on('submit', function () {            
+            $('#loadingScreen').fadeIn();
+
+            // Allow the form to continue submitting
+        });
+
+
+    });
+
     async function DetectFaceinImage(imageFile) {
         const formData = new FormData();
         formData.append('imageFile', imageFile);
