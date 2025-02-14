@@ -1,0 +1,30 @@
+# Ignore .git files
+.git
+.gitignore
+
+# Ignore build output
+bin/
+obj/
+
+# Ignore user-specific files
+.vscode/
+.idea/
+
+# Ignore secrets or sensitive information files
+secrets.json
+*.key
+*.pem
+
+# Ignore local configuration files
+appsettings.Development.json
+
+# Ignore logs
+*.log
+
+# Ignore test files and directories
+test/
+
+# Ignore temporary or auto-generated files
+*.user
+*.suo
+*.swp
