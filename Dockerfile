@@ -1,6 +1,16 @@
-# Use official .NET SDK image for build
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+# Use the official DlibDotNet runtime image as the base
+FROM takuya/dlib-dotnet:runtime-ubuntu-16.04 AS base
 WORKDIR /app
+
+# Install libgdiplus for System.Drawing support
+RUN apt-get update && apt-get install -y \
+    libgdiplus \               # Required for System.Drawing
+    && ln -s /usr/lib/libgdiplus.so /usr/lib/libgdiplus.so.0 \  # Create a symbolic link
+    && rm -rf /var/lib/apt/lists/*
+
+# Use the .NET SDK image for building the application
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
 
 # Copy the project files and restore dependencies
 COPY *.csproj ./
@@ -12,23 +22,18 @@ COPY . ./
 # Publish the application to a directory in the container
 RUN dotnet publish -c Release -o /out
 
-# Use a lightweight .NET runtime image for production
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
+# Use the DlibDotNet runtime image for the final stage
+FROM base AS final
 WORKDIR /app
-
-# Install native dependencies required by DlibDotNet
-RUN apt-get update && apt-get install -y \
-    libopenblas-dev \
-    liblapack-dev \
-    libx11-6 \
-    libgdiplus \
-    && rm -rf /var/lib/apt/lists/*
 
 # Copy the published application from the build stage
 COPY --from=build /out ./
 
 # Ensure necessary resources are included in the runtime image
 COPY Resources/ ./Resources/
+
+# Set the library path for libgdiplus
+ENV LD_LIBRARY_PATH=/usr/lib
 
 # Expose the port the app will run on
 EXPOSE 8080
