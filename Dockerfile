@@ -22,6 +22,8 @@ RUN apt-get update && apt-get install -y \
     liblapack-dev \
     libx11-6 \
     libgdiplus \
+    libjpeg-dev \
+    libtiff-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy the published application from the build stage

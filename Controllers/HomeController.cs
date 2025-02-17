@@ -40,7 +40,7 @@ namespace GuardID.Controllers
         [HttpPost]
         public IActionResult DetectFaceinImage(IFormFile imageFile)
         {
-            //try
+            try
             {
                 var imageFilePath = SaveToTempFile(imageFile);
 
@@ -55,10 +55,10 @@ namespace GuardID.Controllers
                     return Json(new { success = true, message = "Face is detected" });
                 }
             }
-            //catch (Exception ex)
-            //{
-            //    return Json(new { success = false, message = "An error occurred: " + ex.Message });
-            //}
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "An error occurred: " + ex.Message });
+            }
         }
         [HttpPost]
         public IActionResult DetectBarCodeinImage(IFormFile imageFile)
