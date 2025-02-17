@@ -413,11 +413,24 @@ namespace GuardID.Controllers
             if (!System.IO.File.Exists(credentialPath))
             {
                 string base64Json = Environment.GetEnvironmentVariable("GOOGLE_CLOUD_VISION");
-                Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", base64Json);
-                //throw new FileNotFoundException($"Google Cloud Vision credentials file not found: {credentialPath}");
+
+                if (!string.IsNullOrEmpty(base64Json))
+                {
+                    // Decode the base64 string and write it to a temporary file
+                    string tempCredentialPath = Path.GetTempFileName();
+                    System.IO.File.WriteAllBytes(tempCredentialPath, Convert.FromBase64String(base64Json));
+
+                    // Set the environment variable to the path of the temporary credentials file
+                    Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", tempCredentialPath);
+                }
+                else
+                {
+                    throw new FileNotFoundException("Google Cloud Vision credentials base64 not found in environment variables.");
+                }
             }
-            else 
+            else
             {
+                // If the file exists, just set the environment variable to the file path
                 Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", credentialPath);
             }
             // Convert processed image to base64 string
