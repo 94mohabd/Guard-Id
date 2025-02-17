@@ -1,6 +1,15 @@
-# Use official .NET SDK image for build
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+# Use the official DlibDotNet runtime image as the base
+FROM takuya/dlib-dotnet:runtime-ubuntu-16.04 AS base
 WORKDIR /app
+
+# Install additional dependencies (if needed)
+RUN apt-get update && apt-get install -y \
+    libgdiplus \               # Required for System.Drawing (if used)
+    && rm -rf /var/lib/apt/lists/*
+
+# Use the .NET SDK image for building the application
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
 
 # Copy the project files and restore dependencies
 COPY *.csproj ./
@@ -12,16 +21,9 @@ COPY . ./
 # Publish the application to a directory in the container
 RUN dotnet publish -c Release -o /out
 
-# Use a lightweight .NET runtime image for production
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
+# Use the DlibDotNet runtime image for the final stage
+FROM base AS final
 WORKDIR /app
-
-# Install native dependencies required by DlibDotNet
-RUN apt-get update && apt-get install -y \
-    libopenblas-dev \
-    liblapack-dev \
-    libx11-6 \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Copy the published application from the build stage
 COPY --from=build /out ./
