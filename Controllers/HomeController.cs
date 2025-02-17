@@ -403,20 +403,25 @@ namespace GuardID.Controllers
             string tempDir = Path.Combine(Directory.GetCurrentDirectory(), "temp");
             Directory.CreateDirectory(tempDir); // Ensure temp directory exists
 
-            string backIdFilePath = Path.Combine(tempDir, Path.GetRandomFileName());
+            string backIdFilePath = Path.Combine(tempDir, Path.GetRandomFileName() + ".jpg");
 
             try
             {
+                // Save file to temp location
                 using (var fileStream = new FileStream(backIdFilePath, FileMode.Create, FileAccess.Write))
                 {
                     backId.CopyTo(fileStream);
                 }
 
-                // Now open a new FileStream for reading (fixes Linux issue)
+                // Open the file and read barcode
                 using (var fileStream = new FileStream(backIdFilePath, FileMode.Open, FileAccess.Read))
                 using (BarcodeReader reader = new BarcodeReader())
                 {
+                    // Enable PDF417 and Driver License scanning
+                    reader.Pdf417 = true;
                     reader.DrvLicID = true;
+
+                    // Read barcodes
                     Barcode[] barcodes = reader.Read(fileStream);
                     if (barcodes != null && barcodes.Length > 0)
                     {
@@ -427,10 +432,22 @@ namespace GuardID.Controllers
                         }
                         else
                         {
-                            barcodeText = barcode.Type.ToString();
+                            barcodeText = barcode.Type.ToString(); // If it's not PDF417, return type
                         }
                     }
+                    else
+                    {
+                        barcodeText = "No barcode detected";
+                    }
                 }
+            }
+            catch (FileNotFoundException fnfEx)
+            {
+                Console.WriteLine($"File not found: {fnfEx.Message}");
+            }
+            catch (UnauthorizedAccessException uaEx)
+            {
+                Console.WriteLine($"Unauthorized access: {uaEx.Message}");
             }
             catch (Exception ex)
             {
@@ -447,6 +464,7 @@ namespace GuardID.Controllers
 
             return barcodeText;
         }
+
         private List<string> ExtractTextFromImage(string idFilePath)
         {
             List<string> lines = new List<string>();
