@@ -16,14 +16,6 @@ RUN dotnet publish -c Release -o /out
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
 WORKDIR /app
 
-# Install native dependencies required by DlibDotNet
-RUN apt-get update && apt-get install -y \
-    libopenblas-dev \          # Required for Dlib's linear algebra operations
-    liblapack-dev \            # Required for Dlib's linear algebra operations
-    libx11-6 \                 # Required for Dlib's GUI and image display
-    libgdiplus \               # Required for System.Drawing (if used)
-    && rm -rf /var/lib/apt/lists/*
-
 # Copy the published application from the build stage
 COPY --from=build /out ./
 
