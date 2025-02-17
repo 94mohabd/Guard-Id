@@ -9,6 +9,8 @@
 	<ItemGroup>
 		<PackageReference Include="ClearImage.BarcodeReader.IP" Version="12.0.7675" />
 		<PackageReference Include="DlibDotNet" Version="19.21.0.20220724" />
+		<PackageReference Include="DlibDotNet.CUDA100" Version="19.21.0.20220724" />
+		<PackageReference Include="DlibDotNet.CUDA92" Version="19.21.0.20220724" />
 		<PackageReference Include="GeoCoordinate.NetCore" Version="1.0.0.1" />
 		<PackageReference Include="Google.Cloud.Vision.V1" Version="3.7.0" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
