@@ -16,6 +16,13 @@ RUN dotnet publish -c Release -o /out
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
 WORKDIR /app
 
+# Install native dependencies required by DlibDotNet
+RUN apt-get update && apt-get install -y \
+    libopenblas-dev \
+    liblapack-dev \
+    libx11-6 \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
 # Copy the published application from the build stage
 COPY --from=build /out ./
 
