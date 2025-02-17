@@ -2,9 +2,10 @@
 FROM takuya/dlib-dotnet:runtime-ubuntu-16.04 AS base
 WORKDIR /app
 
-# Install additional dependencies (if needed)
+# Install libgdiplus for System.Drawing support
 RUN apt-get update && apt-get install -y \
-    libgdiplus \               # Required for System.Drawing (if used)
+    libgdiplus \               # Required for System.Drawing
+    && ln -s /usr/lib/libgdiplus.so /usr/lib/libgdiplus.so.0 \  # Create a symbolic link
     && rm -rf /var/lib/apt/lists/*
 
 # Use the .NET SDK image for building the application
