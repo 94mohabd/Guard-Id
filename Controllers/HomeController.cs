@@ -398,10 +398,22 @@ namespace GuardID.Controllers
         private string ExtractBarcodeText(IFormFile backId)
         {
             var barcodeText = string.Empty;
-            string backIdFilePath = Path.GetTempFileName();
-            using (var fileStream = new FileStream(backIdFilePath, FileMode.Create))
+
+            // Use a more reliable temporary file location
+            string tempDir = Path.Combine(Directory.GetCurrentDirectory(), "temp");
+            Directory.CreateDirectory(tempDir); // Ensure temp directory exists
+
+            string backIdFilePath = Path.Combine(tempDir, Path.GetRandomFileName());
+
+            try
             {
-                backId.CopyTo(fileStream);
+                using (var fileStream = new FileStream(backIdFilePath, FileMode.Create, FileAccess.Write))
+                {
+                    backId.CopyTo(fileStream);
+                }
+
+                // Now open a new FileStream for reading (fixes Linux issue)
+                using (var fileStream = new FileStream(backIdFilePath, FileMode.Open, FileAccess.Read))
                 using (BarcodeReader reader = new BarcodeReader())
                 {
                     reader.DrvLicID = true;
@@ -420,6 +432,19 @@ namespace GuardID.Controllers
                     }
                 }
             }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error reading barcode: {ex.Message}");
+            }
+            finally
+            {
+                // Clean up temp file to avoid leaks
+                if (System.IO.File.Exists(backIdFilePath))
+                {
+                    System.IO.File.Delete(backIdFilePath);
+                }
+            }
+
             return barcodeText;
         }
         private List<string> ExtractTextFromImage(string idFilePath)
