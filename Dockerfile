@@ -18,8 +18,10 @@ WORKDIR /app
 
 # Install native dependencies required by DlibDotNet
 RUN apt-get update && apt-get install -y \
-    libopencv-dev \
-    libdlib-dev \
+    libopenblas-dev \          # Required for Dlib's linear algebra operations
+    liblapack-dev \            # Required for Dlib's linear algebra operations
+    libx11-6 \                 # Required for Dlib's GUI and image display
+    libgdiplus \               # Required for System.Drawing (if used)
     && rm -rf /var/lib/apt/lists/*
 
 # Copy the published application from the build stage
@@ -27,9 +29,6 @@ COPY --from=build /out ./
 
 # Ensure necessary resources are included in the runtime image
 COPY Resources/ ./Resources/
-
-# Optionally, set environment variables for native libraries (if needed)
-# ENV DLIB_PATH=/app/Resources
 
 # Expose the port the app will run on
 EXPOSE 8080
