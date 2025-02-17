@@ -3,7 +3,7 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /app
 
 # Copy the project files and restore dependencies
-COPY *.csproj ./ 
+COPY *.csproj ./
 RUN dotnet restore
 
 # Copy the rest of the application code
@@ -16,8 +16,14 @@ RUN dotnet publish -c Release -o /out
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
 WORKDIR /app
 
+# Install native dependencies required by DlibDotNet
+RUN apt-get update && apt-get install -y \
+    libopencv-dev \
+    libdlib-dev \
+    && rm -rf /var/lib/apt/lists/*
+
 # Copy the published application from the build stage
-COPY --from=build /out ./ 
+COPY --from=build /out ./
 
 # Ensure necessary resources are included in the runtime image
 COPY Resources/ ./Resources/
