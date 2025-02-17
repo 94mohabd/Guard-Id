@@ -174,7 +174,8 @@
         $('#backIdloadingMessage').show();
         if (input.files && input.files[0]) {
             const imageFile = input.files[0];
-            let resizedImage = await resizeImageTo1MB(imageFile);
+            //let resizedImage = await resizeImageTo1MB(imageFile);
+            let resizedImage = imageFile;
             var hasBarCode = await DetectBarCodeinImage(resizedImage);
                 $('#backIdloadingMessage').hide();
             if (!hasBarCode.success) {
