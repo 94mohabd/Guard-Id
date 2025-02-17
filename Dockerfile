@@ -18,6 +18,9 @@ WORKDIR /app
 
 # Install native dependencies required by DlibDotNet
 RUN apt-get update && apt-get install -y \
+    libopenblas-dev \
+    liblapack-dev \
+    libx11-6 \
     libgdiplus \
     && rm -rf /var/lib/apt/lists/*
 
