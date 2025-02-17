@@ -11,6 +11,8 @@ using GeoCoordinatePortable;
 using DlibDotNet;
 using Google.Cloud.Vision.V1;
 using DlibDotNet.Extensions;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp;
 
 namespace GuardID.Controllers
 {
@@ -251,47 +253,57 @@ namespace GuardID.Controllers
         }
         private static List<string> DetectFacesAndConvertToBase64(string imagePath)
         {
-            string shapePredictorPath = Path.Combine(System.IO.Directory.GetCurrentDirectory(), "Resources", "shape_predictor_68_face_landmarks.dat");
-            // Initialize the face detector and shape predictor
+            string shapePredictorPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "shape_predictor_68_face_landmarks.dat");
+
             using (var detector = Dlib.GetFrontalFaceDetector())
             using (var shapePredictor = ShapePredictor.Deserialize(shapePredictorPath))
+            using (var image = Dlib.LoadImage<RgbPixel>(imagePath))
             {
-                // Load the image using Dlib
-                using (var image = Dlib.LoadImage<RgbPixel>(imagePath))
+                var faces = detector.Operator(image);
+                var faceBase64Strings = new List<string>();
+
+                foreach (var face in faces)
                 {
-                    // Detect faces in the image
-                    var faces = detector.Operator(image);
+                    var shape = shapePredictor.Detect(image, face);
+                    var faceChipDetails = Dlib.GetFaceChipDetails(shape);
 
-                    // Initialize a list to store Base64 strings of detected faces
-                    var faceBase64Strings = new List<string>();
-
-                    foreach (var face in faces)
+                    using (var faceImage = Dlib.ExtractImageChip<RgbPixel>(image, faceChipDetails))
                     {
-                        // Get the landmarks for the detected face
-                        var shape = shapePredictor.Detect(image, face);
+                        // Convert Dlib image to ImageSharp image
+                        var imageSharp = ConvertDlibToImageSharp(faceImage);
 
-                        // Extract the face chip using the landmarks
-                        var faceChipDetails = Dlib.GetFaceChipDetails(shape);
-                        using (var faceImage = Dlib.ExtractImageChip<RgbPixel>(image, faceChipDetails))
+                        // Convert ImageSharp to Base64
+                        using (var ms = new MemoryStream())
                         {
-                            // Convert the Dlib face image to a Bitmap
-                            using (var bitmap = faceImage.ToBitmap())
-                            {
-                                // Convert the Bitmap to a Base64 string
-                                using (var ms = new MemoryStream())
-                                {
-                                    bitmap.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
-                                    var base64String = Convert.ToBase64String(ms.ToArray());
-                                    faceBase64Strings.Add(base64String);
-                                }
-                            }
+                            imageSharp.SaveAsPng(ms);
+                            faceBase64Strings.Add(Convert.ToBase64String(ms.ToArray()));
                         }
                     }
-
-                    return faceBase64Strings;
                 }
+
+                return faceBase64Strings;
             }
         }
+        private static SixLabors.ImageSharp.Image<Rgb24> ConvertDlibToImageSharp(Array2D<RgbPixel> dlibImage)
+        {
+            int width = dlibImage.Columns;
+            int height = dlibImage.Rows;
+            var imageSharp = new SixLabors.ImageSharp.Image<Rgb24>(width, height);
+
+            for (int y = 0; y < height; y++)
+            {
+                var row = dlibImage[y]; // GetRow instead of direct indexing
+
+                for (int x = 0; x < width; x++)
+                {
+                    RgbPixel pixel = row[x]; // Now access pixel correctly
+                    imageSharp[x, y] = new Rgb24(pixel.Red, pixel.Green, pixel.Blue);
+                }
+            }
+
+            return imageSharp;
+        }
+
         private string ConvertToBase64String(IFormFile imageFile)
         {
             string base64String = string.Empty;
@@ -438,7 +450,7 @@ namespace GuardID.Controllers
 
             // Perform OCR using Google Cloud Vision
             var client = ImageAnnotatorClient.Create();
-            var googleImage = Image.FromFile(idFilePath);
+            var googleImage = Google.Cloud.Vision.V1.Image.FromFile(idFilePath);
 
             var response = client.DetectText(googleImage);
             var extractedText = response.FirstOrDefault()?.Description ?? string.Empty;

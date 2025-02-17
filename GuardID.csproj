@@ -12,6 +12,7 @@
 		<PackageReference Include="GeoCoordinate.NetCore" Version="1.0.0.1" />
 		<PackageReference Include="Google.Cloud.Vision.V1" Version="3.7.0" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+		<PackageReference Include="SixLabors.ImageSharp" Version="3.1.6" />
 	</ItemGroup>
 	
 	<ItemGroup>
