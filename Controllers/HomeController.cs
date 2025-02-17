@@ -413,9 +413,13 @@ namespace GuardID.Controllers
             if (!System.IO.File.Exists(credentialPath))
             {
                 string base64Json = Environment.GetEnvironmentVariable("GOOGLE_CLOUD_VISION");
+                Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", base64Json);
                 //throw new FileNotFoundException($"Google Cloud Vision credentials file not found: {credentialPath}");
             }
-            Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", credentialPath);
+            else 
+            {
+                Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", credentialPath);
+            }
             // Convert processed image to base64 string
             OCRImage = ConvertJpgToBase64(idFilePath);
 
