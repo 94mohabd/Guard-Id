@@ -63,21 +63,28 @@ namespace GuardID.Controllers
         [HttpPost]
         public IActionResult DetectBarCodeinImage(IFormFile imageFile)
         {
-            var barcodeText = ExtractBarcodeText(imageFile);
-            var parseBarcodeText = ParseBarcodeText(barcodeText);
-            var xmlTable = parseBarcodeText.xmlTable;
-            // check if any PDF417 barcode detected from the front Id
-            if (string.IsNullOrEmpty(barcodeText))
+            try
             {
-                return Json(new { success = false, message = "Failed to detect PDF417 barcode" });
+                var barcodeText = ExtractBarcodeText(imageFile);
+                var parseBarcodeText = ParseBarcodeText(barcodeText);
+                var xmlTable = parseBarcodeText.xmlTable;
+                // check if any PDF417 barcode detected from the front Id
+                if (string.IsNullOrEmpty(barcodeText))
+                {
+                    return Json(new { success = false, message = "Failed to detect PDF417 barcode" });
+                }
+                if (xmlTable == null)
+                {
+                    return Json(new { success = false, message = "Please provide a valid ID!" });
+                }
+                else
+                {
+                    return Json(new { success = true, message = "PDF417 barcode is detected" });
+                }
             }
-            if (xmlTable == null)
+            catch (Exception ex)
             {
-                return Json(new { success = false, message = "Please provide a valid ID!" });
-            }
-            else
-            {
-                return Json(new { success = true, message = "PDF417 barcode is detected" });
+                return Json(new { success = false, message = "An error occurred: " + ex.Message });
             }
         }
         [HttpPost]
