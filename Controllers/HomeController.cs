@@ -13,6 +13,7 @@ using Google.Cloud.Vision.V1;
 using DlibDotNet.Extensions;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp;
+using System.Runtime.InteropServices;
 
 namespace GuardID.Controllers
 {
@@ -24,6 +25,7 @@ namespace GuardID.Controllers
         [Route("/")]
         public IActionResult Index()
         {
+            ViewBag.OS = @RuntimeInformation.OSDescription;
             return View();
         }
         [Route("/Result")]
